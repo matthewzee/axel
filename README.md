@@ -118,6 +118,8 @@ The specialists, which the main bot hires when you ask ("set up the team", or ju
 | **Maps** | Google Listing | A full, current Google Business Profile: matching details, services, description, booking link, recent photos. |
 | **Penny** | Ads Check | An offer in every ad, a landing page per service, and nobody else's ad on the business's own name. |
 
+The same team also runs without the app, in plain Claude Code: `claude-code/` holds the eleven skills as Claude Code skills and the eight specialists as subagents, with a CLAUDE.md for the checklist and the rules. `node scripts/export-claude-code.mjs` regenerates it from the source below.
+
 Each specialist comes with its How I work and follows Bops' own skills under the label **Lead leaks and funnels** (`lib/agency-skills.ts`): an exact procedure per job, which every bot has and nobody edits. The roster, the checklist and what every bot is told about the agency live in `lib/agency.ts`; hiring is `lib/server/agency-team.ts` and `POST /api/agency-team`.
 
 Three rules every bot keeps: never contact a business the agency hasn't signed; never invent a review, a rating, a number or a result; never promise a result. Nobody can promise an owner will say yes.
