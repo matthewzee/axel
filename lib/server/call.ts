@@ -3,6 +3,7 @@ import { computerBriefing, teamBriefing } from "./briefing";
 import { belowOf } from "@/lib/chain";
 import { appsOpen } from "@/lib/apps-access";
 import { aboutBops, SPEAKING } from "./style";
+import { aboutAgency } from "@/lib/agency";
 import { howIWork } from "@/cloud/style";
 import { appsNote, placesNote } from "./skills";
 import { dataNote } from "./treg";
@@ -92,6 +93,7 @@ export async function voicePrompt(b: Bot, how: "live" | "turns" = "live") {
     SPEAKING,
     // With Apps for an account they're open to (lib/apps-access.ts).
     aboutBops(appsOpen(getState())),
+    aboutAgency(),
     contactLine(b, true),
     // What it can use (through its delegate) and where else the user reaches it.
     appsNote(b, "call"),

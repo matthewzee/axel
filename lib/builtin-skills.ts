@@ -1,4 +1,5 @@
-import { APPS_LABEL, sameLabel } from "./skill-labels";
+import { APPS_LABEL, LEAKS_LABEL, sameLabel } from "./skill-labels";
+import { AGENCY_SKILLS } from "./agency-skills";
 
 /*
  * Bops' own skills, which every bot has and nobody edits (lib/skill-labels.ts): each one a short, exact
@@ -34,6 +35,10 @@ export const BUILTIN_LABELS: BuiltinLabel[] = [
   {
     label: APPS_LABEL,
     about: "Building, versioning and deploying your workspace's apps with Ingot, Orgo's source control: read one before you change an app's code or put it live.",
+  },
+  {
+    label: LEAKS_LABEL,
+    about: "The agency's work on local businesses: scanning a funnel for lead leaks on a phone, the pitch pictures, and building each fix (site, form, text back, reviews, listing, ads).",
   },
 ];
 
@@ -336,6 +341,8 @@ const PREVIEW_ON_A_PUBLIC_URL = [
 ];
 
 export const BUILTIN_SKILLS: BuiltinSkill[] = [
+  // The agency's own, first: what the team is for (lib/agency.ts).
+  ...AGENCY_SKILLS,
   {
     slug: "bops-work-on-an-app",
     name: "Work on an app with Ingot",
@@ -394,7 +401,7 @@ export const BUILTIN_SKILLS: BuiltinSkill[] = [
 /**
  * Bops' own skills an account has, and their labels: those under APPS_LABEL only where apps are open
  * (`apps`: lib/apps-access.ts appsOpen), so anyone else's bots never list, read or get them on a computer,
- * and the Skills page doesn't show them.
+ * and the Skills page doesn't show them. The agency's (LEAKS_LABEL) are every account's.
  */
 export const builtinSkills = (apps: boolean): BuiltinSkill[] => (apps ? BUILTIN_SKILLS : BUILTIN_SKILLS.filter((s) => !sameLabel(s.label, APPS_LABEL)));
 export const builtinLabels = (apps: boolean): BuiltinLabel[] => (apps ? BUILTIN_LABELS : BUILTIN_LABELS.filter((l) => !sameLabel(l.label, APPS_LABEL)));

@@ -2,11 +2,15 @@
   <a href="https://bops.bot"><img src="desktop/icon.png" width="112" height="112" alt="Bops"></a>
 </p>
 
-<h1 align="center">Bops</h1>
+<h1 align="center">Axel</h1>
 
 <p align="center">
-  <b>Business ops, run by bots.</b><br>
-  A team of AI bots that works for you on real computers. Chat with them like teammates, and they get the work done.
+  <b>Lead leaks, found and fixed by bots.</b><br>
+  A team of AI bots for a digital agency that serves local trades. They find where a business loses customers online, make the proof for your pitch, and build the fix. You send the email.
+</p>
+
+<p align="center">
+  Axel is a fork of <a href="https://github.com/OrgoAI/bops">Bops</a>, re-engineered for agencies. Everything Bops does (real computers, your apps, texts and calls, Slack) is still here; what changed is the team and what it knows. See <a href="#the-agency-team">The agency team</a>.
 </p>
 
 <p align="center">
@@ -84,10 +88,44 @@ Bops is a Mac app that gives you a team of AI bots for your business ops: inbox,
   </tr>
 </table>
 
+## The agency team
+
+The shape comes from [Boring Funnels](https://boringfunnels.com): find local businesses losing customers, pitch them with proof, build the fix. Axel gives each part of that to a bot.
+
+**Find.** A leak is something a customer meets on a phone before they call someone else. Every bot scores the same checklist, in the order a customer meets it:
+
+| Pillar | Leaks |
+|---|---|
+| Website, first screen | Number buried · No way to book · Rating hidden · Nothing clear · Ad says one thing · No reason today · First screen wasted · Slow to load |
+| Google listing | Reviews falling behind · No owner replies · Thin profile · Wrong details |
+| Google Ads | No offer in the ad · Rival on their name · Ad to the homepage |
+| Follow up | Missed calls lost · Forms go cold · No review ask |
+
+**Pitch.** Two pictures: the business's first screen on a phone with the leak circled, and the same screen fixed in their brand, with only true details. The main bot drafts the email. You send it from your own inbox: the bots never contact a business you haven't signed.
+
+**Fix.** When the owner says yes, the specialist who owns that leak builds it, shows it, and puts it live only when told.
+
+The specialists, which the main bot hires when you ask ("set up the team", or just ask for the work):
+
+| Bot | Role | Owns |
+|---|---|---|
+| **Scout** | Leak Scanner | Scans a funnel on a phone and scores every leak. For clients, scans again every week and speaks only when a leak opens or closes. |
+| **Mason** | Website Builder | New converting sites, reworks of an existing site, and a real website out of a Facebook page. Phone first, first screen first, live only when told. |
+| **Sketch** | Pitch Mockups | The two pitch pictures: the leak circled, and the fix in their brand. |
+| **Ivy** | Intake Forms | The lead form for a trades business: five fields in the office's order, instant reply, the lead on the owner's phone, a test lead before it's done. |
+| **Ringo** | Missed Call Text Back | A missed call gets a text within a minute in the owner's voice, with a booking link; the owner gets the lead. Weekly check that it still works. |
+| **Stella** | Review Requests | A review ask the evening a job closes, one reminder, replies to every review, and a Monday count against the town's leaders. |
+| **Maps** | Google Listing | A full, current Google Business Profile: matching details, services, description, booking link, recent photos. |
+| **Penny** | Ads Check | An offer in every ad, a landing page per service, and nobody else's ad on the business's own name. |
+
+Each specialist comes with its How I work and follows Bops' own skills under the label **Lead leaks and funnels** (`lib/agency-skills.ts`): an exact procedure per job, which every bot has and nobody edits. The roster, the checklist and what every bot is told about the agency live in `lib/agency.ts`; hiring is `lib/server/agency-team.ts` and `POST /api/agency-team`.
+
+Three rules every bot keeps: never contact a business the agency hasn't signed; never invent a review, a rating, a number or a result; never promise a result. Nobody can promise an owner will say yes.
+
 ## What your bots can do
 
 - **Work on real computers.** Your bots work on a cloud computer from [Orgo](https://orgo.ai): 4 cores, 16 GB RAM and 4 screens, with Chrome, LibreOffice, GIMP and Inkscape. Watch any screen live, or take over. On Free and Pro all your bots share one computer. Max gives you up to 3.
-- **Work as a team.** A main bot (Boppy, unless you rename it) runs the team and hands work to the specialists you add. Bots talk to each other, keep threads and report back in the chat. Each workspace is its own team.
+- **Work as a team.** A main bot (Boppy, unless you rename it) runs the team, keeps the pitch, and hands each leak to the specialist who owns it (see [The agency team](#the-agency-team)). Bots talk to each other, keep threads and report back in the chat. Each workspace is its own team.
 - **Remember.** What you tell your bots, they remember, per workspace, on every channel.
 - **Use your apps.** Connect Gmail, Calendar and any of about 1,400 apps, with several accounts each. Reading runs at once. Sending, creating or paying asks you first. A bot set to Just do it sends and changes things without asking, and still asks before paying.
 - **Look things up.** Companies, people, work emails (checked before they're used), phones, company news, hiring and funding, and local businesses, for cents a lookup. A pricier lookup asks you first, and so does emailing someone a bot found, even on Just do it.
@@ -266,6 +304,8 @@ The app runs with the hardened runtime and three entitlements (`build/entitlemen
 | `app/` | Next.js routes: the UI and `app/api/*` |
 | `components/app/` | The app's UI. `components/message-ui/` is the chat kit. |
 | `lib/server/` | Everything server-side: chat engine, sessions, providers, state |
+| `lib/agency.ts` | The agency edition: the specialists, the leak checklist, and what every bot is told about the agency |
+| `lib/agency-skills.ts` | The agency's skills (audit, scan, first screen, site, Facebook page, mockup, form, text back, reviews, listing, ads) |
 | `lib/plan-includes.ts` | What each plan includes, in the words the app and bops.bot show |
 | `desktop/` | The Electron shell |
 | `vm/` | What runs on the bots' computers: screen MCP, browser helpers |
