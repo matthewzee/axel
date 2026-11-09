@@ -26,6 +26,8 @@ import { computerBriefing, teamBriefing } from "./briefing";
 import { belowOf, directOf, entryOf, inLine, mayAskIn, ownMemory, reachOf, readsTeam, worksForNow } from "@/lib/chain";
 import { asksNow, chartedFor, handOffRefused, namesList, teamNow } from "./chart";
 import { aboutBops, ASKING, tidyAnswer, WRITING } from "./style";
+import { aboutAgency, teamLine } from "@/lib/agency";
+import { agencyTeam, hireSpecialist, specialistFor } from "./agency-team";
 import { howIWork, plainLinks } from "@/cloud/style";
 import { whenText } from "@/cloud/schedule";
 import { buildApp, madeApp } from "./made-apps";
@@ -297,6 +299,8 @@ function persona(b: Bot, others: Bot[]) {
     WRITING,
     ASKING,
     aboutBops(appsOpen(getState())),
+    // Whom the team serves and how a leak is judged (lib/agency.ts): the same for every bot, so the prompt cache holds.
+    aboutAgency(),
     // A bot that shares works on the main bot's computer, its four screens shared with the team (lib/screens.ts).
     workComputer(b).id === b.id
       ? `You have your own cloud computer with a browser and four screens, so up to 4 long tasks at once. Each task is a thread ${owner} can open.`
@@ -344,6 +348,8 @@ function persona(b: Bot, others: Bot[]) {
             : "You run the team, which is just you so far.",
           others.length ? `Team: ${others.map((o) => `${o.id} (${o.name}, ${o.role}${teamExtra(o)}${o.email ? `, ${o.email}` : ""}${o.phone ? `, ${o.phone}` : ""})`).join(", ")}.` : "",
           `When ${owner} asks for a new bot, or wants a kind of work that deserves its own specialist, create it with create_bot (a short human name and a one or two word role). Pass a first task if there is one. A new bot works on screens of your computer; give it a computer of its own (own_computer) only when ${owner} asks for that or its work needs to stay apart from yours (its own logins, long-running work).`,
+          // The agency's roster (lib/agency.ts): who owns which leak, and which specialists are still to hire.
+          teamLine(new Set(agencyTeam(workspaceOf(b)).keys())),
         ].filter(Boolean)
       : []),
   ]
@@ -3106,11 +3112,14 @@ async function turn(botId: string, chatId: string, opts: TurnOptions = {}): Prom
       }
       if (item.name === "create_bot") {
         const a = JSON.parse(item.arguments) as { name: string; role: string; own_computer: boolean | null; title: string | null; goal: string | null };
-        const made = await createBot(a.name, a.role, workspaceOf(b), a.own_computer === true);
+        // One of the agency's specialists by name (lib/agency.ts): hired as one, with its own How I work, and never twice.
+        const spec = specialistFor({ name: a.name });
+        const hired = spec ? await hireSpecialist(spec.key, workspaceOf(b)) : undefined;
+        const made = hired ? ("error" in hired ? hired : { botId: hired.bot.id, chatId: botChatId(hired.bot.id), ...(hired.note ? { note: hired.note } : {}) }) : await createBot(a.name, a.role, workspaceOf(b), a.own_computer === true);
         stillOurs(ours);
         if ("error" in made) notes.push(`Couldn't create ${a.name}: ${made.error}`);
         else {
-          notes.push(`${b.name} added ${a.name} (${a.role}) to the team`);
+          notes.push(hired && !("error" in hired) && !hired.made ? `${spec?.name} was already on the team` : `${b.name} added ${a.name} (${a.role}) to the team`);
           if (made.note) notes.push(made.note);
           if (a.goal) {
             const s = startSession({ botId: made.botId, goal: a.goal, title: a.title ?? a.goal.slice(0, 40), chatId, sentVia: botId, viaBot: true, outside: outsideFrom, secret: place.secret });

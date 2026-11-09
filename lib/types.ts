@@ -112,6 +112,11 @@ export type Bot = {
    */
   persona?: string;
   /**
+   * Which of the agency's specialists this bot is (lib/agency.ts AGENCY_TEAM, by key), when Bops hired it as one
+   * (lib/server/agency-team.ts): so a rename keeps it the same specialist, and it's never hired twice.
+   */
+  agencyKey?: string;
+  /**
    * Who wrote `persona` when the owner didn't (an Admin, from their own Bops: lib/server/member-acts.ts), and the owner's
    * own last words then (`ownerText`), which work on the owner's Mac keeps to (personaOf). The owner's Save clears it.
    */

@@ -34,7 +34,9 @@ registerHooks({
 });
 
 const { BUILTIN_LABELS, BUILTIN_SKILLS } = await import(`${root}/lib/builtin-skills.ts`);
-const { APPS_LABEL, SKILL_LABEL_MAX, cleanLabel, isUnsorted } = await import(`${root}/lib/skill-labels.ts`);
+const { APPS_LABEL, LEAKS_LABEL, SKILL_LABEL_MAX, cleanLabel, isUnsorted } = await import(`${root}/lib/skill-labels.ts`);
+const { AGENCY_SKILLS } = await import(`${root}/lib/agency-skills.ts`);
+const { AGENCY_TEAM } = await import(`${root}/lib/agency.ts`);
 const { BUNDLE_LIMITS, SLUG_RE, checkFolder, isScript, renderSkillMd } = await import(`${root}/lib/server/skill-bundle.ts`);
 
 let failures = 0;
@@ -59,6 +61,16 @@ const INGOT_SUBCOMMANDS = new Set(["clone", "status", "diff", "commit", "pull", 
 const TAUGHT = ["clone", "status", "diff", "commit", "pull", "log", "show", "checkout", "export", "git-url"];
 /** Each tool a body may name, with its arguments: Bops' chat tools, then Ingot's (ingot/internal/mcp/hosted.go). */
 const TOOLS = {
+  // The chat tools the agency's skills name (lib/server/chat.ts fn(...), treg.ts business_search, composio.ts use_app, keys.ts call_api).
+  start_task: ["title", "goal", "say", "where", "then_on_mac", "part_of", "skill", "agent"],
+  schedule: ["title", "goal", "schedule", "reminder", "run", "quiet", "deliver_to", "skill", "where", "time_zone"],
+  watch: ["where", "app", "window", "url", "look_for", "every_minutes"],
+  hand_off: ["bot_id", "title", "goal", "say", "where", "then_on_mac"],
+  business_search: ["job"],
+  web_fetch: ["url"],
+  make_image: ["prompt", "shape", "from_chat", "say"],
+  use_app: ["app", "action", "input"],
+  call_api: ["key", "request"],
   work_on_app: ["app", "name", "change", "deploy"],
   deploy_app: ["app", "at"],
   read_skill: ["name", "file"],
@@ -89,9 +101,10 @@ const lineOf = (text, index) => {
   return `line ${n}: ${text.split("\n")[n - 1].trim()}`;
 };
 
-check("The labels: APPS_LABEL among them, each one clean, short, its own and with a line on what it's for", () => {
+check("The labels: APPS_LABEL and LEAKS_LABEL among them, each one clean, short, its own and with a line on what it's for", () => {
   assert.ok(BUILTIN_LABELS.length >= 1);
   assert.ok(BUILTIN_LABELS.some((l) => l.label === APPS_LABEL));
+  assert.ok(BUILTIN_LABELS.some((l) => l.label === LEAKS_LABEL));
   const seen = new Set();
   for (const l of BUILTIN_LABELS) {
     assert.equal(cleanLabel(l.label), l.label, `${l.label} is kept as it's written`);
@@ -103,8 +116,10 @@ check("The labels: APPS_LABEL among them, each one clean, short, its own and wit
   }
 });
 
-check("The skills: seven, each with a slug a skill's folder takes, its own name, a short description, APPS_LABEL and a body", () => {
-  assert.equal(BUILTIN_SKILLS.length, 7);
+check("The skills: the agency's eleven then the apps' seven, each with a slug a skill's folder takes, its own name, a short description, a label of BUILTIN_LABELS and a body", () => {
+  assert.equal(AGENCY_SKILLS.length, 11);
+  assert.equal(BUILTIN_SKILLS.length, AGENCY_SKILLS.length + 7);
+  assert.deepEqual(BUILTIN_SKILLS.slice(0, AGENCY_SKILLS.length), AGENCY_SKILLS, "the agency's come first");
   const slugs = new Set();
   const names = new Set();
   for (const s of BUILTIN_SKILLS) {
@@ -119,7 +134,7 @@ check("The skills: seven, each with a slug a skill's folder takes, its own name,
     assert.ok(s.description.trim().length > 40, `${s.slug}: a description that says when to read it`);
     assert.ok(s.description.length < 220, `${s.slug}: description is ${s.description.length} characters`);
     assert.ok(`${s.name}: ${s.description}`.length <= NOTE_LINE_MAX, `${s.slug}: its line in a prompt is ${`${s.name}: ${s.description}`.length} characters, so it would be cut`);
-    assert.equal(s.label, APPS_LABEL, s.slug);
+    assert.equal(s.label, AGENCY_SKILLS.includes(s) ? LEAKS_LABEL : APPS_LABEL, s.slug);
     assert.ok(BUILTIN_LABELS.some((l) => l.label === s.label), `${s.slug}: its label is one of BUILTIN_LABELS`);
     assert.equal(typeof s.body, "string");
     if (s.about !== undefined) assert.ok(typeof s.about === "string" && s.about.trim(), `${s.slug}: about`);
@@ -293,6 +308,20 @@ check("The four places, in one set of words (Screen 1 to 4, Local, Preview, Publ
   assert.ok(work.includes("`bops-local start <name> <site>`") && !/localhost:3000/.test(work), "its own site's Local, at its own address");
   const web = BUILTIN_SKILLS.find((s) => s.slug === "bops-web-app-that-deploys").body;
   assert.ok(web.includes("Its addresses are its Local's, http://localhost:<its port>") && !/localhost:3000/.test(web));
+});
+
+check("The agency's skills: every skill a specialist leans on exists (lib/agency.ts), each is pointed to by a specialist or another skill, and none contacts a prospect", () => {
+  const names = new Set(BUILTIN_SKILLS.map((s) => s.name));
+  for (const sp of AGENCY_TEAM) for (const n of sp.skills) assert.ok(names.has(n), `${sp.name} leans on "${n}", which isn't a skill`);
+  const leaned = new Set(AGENCY_TEAM.flatMap((sp) => sp.skills));
+  const pointed = new Set(BUILTIN_SKILLS.flatMap((s) => [...s.body.matchAll(/the skill "([^"]+)"/g)].map((m) => m[1])));
+  for (const s of AGENCY_SKILLS) assert.ok(leaned.has(s.name) || pointed.has(s.name), `${s.slug}: no specialist leans on it and no skill points to it`);
+  // The one rule every agency skill keeps: a prospect is never contacted (a client who asked is another matter).
+  for (const s of AGENCY_SKILLS) assert.match(s.body, /[Nn]ever (contact|text|message|email|sign in as|post|run ads for|click|send a test to|change a prospect|suggest an edit)/, `${s.slug}: says what it never does to a prospect`);
+  // The audit's labels are the checklist's (lib/agency.ts LEAK_CHECKLIST), so a report and the window agree.
+  const audit = AGENCY_SKILLS.find((s) => s.slug === "bops-lead-leak-audit").body;
+  for (const label of ["Number buried", "No way to book", "Rating hidden", "Nothing clear", "Ad says one thing", "No reason today", "First screen wasted", "Slow to load", "Reviews falling behind", "No owner replies", "Thin profile", "Wrong details", "No offer in the ad", "Rival on their name", "Ad to the homepage", "Missed calls lost", "Forms go cold", "No review ask"])
+    assert.ok(audit.includes(label), `the audit scores "${label}"`);
 });
 
 console.log(`builtin skills: ${passed} passed, ${failures} failed`);

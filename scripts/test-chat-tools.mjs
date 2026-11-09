@@ -326,7 +326,7 @@ await check("the instructions have the new rules, said once, and none of the old
   // How I work: right after who it is, framed under Bops' rules.
   assert.match(t, /^You are Boppy, Alex's chief of staff in Bops\. [^\n]*\nHow Alex wants you to work, in their words\. [^\n]*approvals still apply[^\n]*\n"""\nBe blunt\. Lead with numbers\.\n"""\n/);
   // Its skills (its procedures from before, moved into the workspace's skills), after its apps.
-  assert.match(t, /\nYour skills: how your workspace does jobs it was shown before, and Bops' own, under labels\.[^\n]*read_skill[^\n]*\nApps and source control \(7\): [^\n]+\nFinance \(1\):\n- Weekly invoice summary: When Alex sends an invoice CSV and asks for a summary/);
+  assert.match(t, /\nYour skills: how your workspace does jobs it was shown before, and Bops' own, under labels\.[^\n]*read_skill[^\n]*\nApps and source control \(7\): [^\n]+\nLead leaks and funnels \(11\): [^\n]+\nFinance \(1\):\n- Weekly invoice summary: When Alex sends an invoice CSV and asks for a summary/);
   assert.ok(t.indexOf("Your apps:") < t.indexOf("Your skills:"));
   // Autopilot and Skills, in How Bops works.
   assert.match(t, /- Autopilot, in the sidebar, lists what bots do on their own: Schedules and Monitors\./);
@@ -969,7 +969,7 @@ await check("read_skill, create_skill (a draft), update_skill, and start_task fo
     t.out(0),
     "Skill: Weekly invoice summary (version 0.1.0)\n\n# Weekly invoice summary\n\n## When to use\n\nWhen Alex sends an invoice CSV and asks for a summary\n\n## Steps\n\n1. Read the CSV.\n2. Total by client.\n3. Reply with the top 3.\n\n## Pitfalls\n\nThe CSV uses commas for thousands.",
   );
-  assert.equal(t.out(1), 'No skill called "Taxes". Your labels: Apps and source control (7), Finance (1). Open one with read_skill and label to see its skills.');
+  assert.equal(t.out(1), 'No skill called "Taxes". Your labels: Apps and source control (7), Lead leaks and funnels (11), Finance (1). Open one with read_skill and label to see its skills.');
   assert.equal(skillNamed("Weekly invoice summary").uses, 1, "a read counts as a use");
   const v = await turnWith("remember how you post the standup", [toolCall("create_skill", { name: "Standup post", description: "When Alex asks for \"the standup notes\"", steps: "1. Read yesterday's chat.\n2. Post three lines.", pitfalls: null })]);
   assert.equal(v.out(), 'Saved "Standup post" as a draft. Alex can publish it in Skills, in Knowledge; then you\'ll use it.');
@@ -1917,7 +1917,7 @@ await check("signed in as someone apps aren't open to (lib/apps-access.ts): no a
     assert.match(t, /\nFinance \(1\):\n- Weekly invoice summary/, "the workspace's own skills stay");
     // Bops' own skills for apps can't be read either.
     const r = await turnWith("how do I deploy", [toolCall("read_skill", { name: "bops-deploy-an-app", file: null, label: null })]);
-    assert.equal(r.out(0), 'No skill called "bops-deploy-an-app". Your labels: Finance (1). Open one with read_skill and label to see its skills.');
+    assert.equal(r.out(0), 'No skill called "bops-deploy-an-app". Your labels: Lead leaks and funnels (11), Finance (1). Open one with read_skill and label to see its skills.');
     // make_app called anyway (a tool it wasn't given): nothing is made, nor said to be.
     const before = messages().length;
     const apps = S.getState().madeApps.length;

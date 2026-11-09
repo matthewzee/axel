@@ -15,6 +15,8 @@ export const SKILL_LABEL_MAX = 40;
 export const UNSORTED = "Unsorted";
 /** The built-in label for apps: Ingot source control, several people pushing, deploying. */
 export const APPS_LABEL = "Apps and source control";
+/** The built-in label for the agency's work: finding lead leaks on a phone, pitching with proof, and building each fix (lib/agency.ts). */
+export const LEAKS_LABEL = "Lead leaks and funnels";
 
 const trimmed = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, SKILL_LABEL_MAX).trim() : "");
 

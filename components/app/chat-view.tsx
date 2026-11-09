@@ -890,13 +890,13 @@ export function ChatView({
                   ? solo.isMain
                     ? teamOf(state).length > 1
                       ? `Text ${solo.name} anything. ${solo.name} hands work to the right bot and keeps you posted.`
-                      : `Text ${solo.name} anything. ${solo.name} works on its own computer, and can build you a team of bots when you need one.`
+                      : `Text ${solo.name} anything. ${solo.name} works on its own computer, and hires the agency's specialists when you ask for the team.`
                     : `Text ${solo.name} directly. Long tasks show up here as threads you can open.`
                   : "Say hi to the group. @mention a bot to point at it."}
               </p>
               {solo && (
                 <div className="mt-1 flex w-full flex-col gap-2">
-                  {(solo.isMain ? ["What is everyone working on?", "Help me onboard a new client", "What can this team do for me?"] : ["What can you do?", "Show me your latest work", "What do you need from me?"]).map((ask) => (
+                  {(solo.isMain ? ["Set up the agency team", "Scan plumbers in Edwardsville, IL for lead leaks", "What is everyone working on?"] : ["What can you do?", "Show me your latest work", "What do you need from me?"]).map((ask) => (
                     <button
                       key={ask}
                       onClick={() => {
